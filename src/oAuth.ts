@@ -1,7 +1,3 @@
-/*
- * Spotify (API) refresh token grant server and uri.
- */
-
 // Package imports
 import http from "http";
 // Type imports
