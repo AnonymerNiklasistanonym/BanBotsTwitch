@@ -1,0 +1,113 @@
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+on:
+  # Run CI when a new branch or tag is created
+  create:
+    # only run if the tag is a supported version tag
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  # Run CI when a new commit is pushed
+  push:
+    branches:
+      - main
+      - dev
+  # Run CI when a new pull request is created
+  pull_request:
+    branches:
+      - main
+      - dev
+  # This attribute allows to manually trigger the workflow from the
+  # Actions tab from the GitHub website
+  workflow_dispatch:
+
+
+# Sets permissions of the GITHUB_TOKEN to allow automatic releases
+permissions:
+  id-token: write
+  contents: write
+  packages: write
+  pull-requests: read
+
+
+jobs:
+
+
+  # Check if the project can be built without errors
+  # Linting, tests and documentation generation is allowed to fail so that in
+  # case of an error in them the core build and scripts are still verified
+  build:
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Install dependencies (npm)
+      run: npm ci
+    #- name: Run tests
+    #  run: npm run test
+    #  continue-on-error: true
+    #- name: Lint
+    #  run: npm run lint
+    #  continue-on-error: true
+    - name: Build
+      run: npm run compile
+    #- name: Lint circular dependencies
+    #  run: npm run lint:circular
+    #  continue-on-error: true
+    #- name: Create documentation
+    #  run: npm run docs
+    #  continue-on-error: true
+    - name: Create binary release
+      run: npm run pkg
+    - name: Save binary release
+      if: contains(github.head_ref, 'main') || startsWith(github.ref, 'refs/tags/v')
+      uses: actions/upload-artifact@v4
+      with:
+        name: bin
+        path: bin
+        retention-days: 7
+        if-no-files-found: error
+
+
+  # Creates a GitHub release if a new tag was pushed
+  create-github-release:
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+        os: [ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    # Only create a GitHub release if a new tag was pushed that starts with v
+    # and if the build step was successful
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Download all workflow run artifacts
+      uses: actions/download-artifact@v4
+    - name: Display structure of downloaded files
+      run: ls -R
+    - name: Create automatic GitHub release
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+         repo_token: "${{ secrets.GITHUB_TOKEN }}"
+         automatic_release_tag: "${{ github.ref_name }}"
+         prerelease: false
+         title: "${{ github.ref_name }}"
+         files: |
+           bin/*

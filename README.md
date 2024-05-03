@@ -1,6 +1,8 @@
 # Twitch Ban Recent Users
 
-In case you get a bot/hate raid you can use the following program to ban all of them automatically.
+Automatically ban recent followers or a list of users.
+
+> **Origin:** In case you get a bot/hate raid you can use the following program to ban all of them automatically.
 
 ## Instructions
 

@@ -9,6 +9,9 @@ import type { ApiClient } from '@twurple/api';
 const credentialsFilePath = path.join(process.cwd(), "credentials.json");
 const argumentsFilePath = path.join(process.cwd(), "arguments.json");
 
+const name = "banbots";
+const version = "1.0.1";
+
 interface Credentials {
     clientId: string;
     clientSecret: string;
@@ -27,6 +30,15 @@ interface Arguments {
 }
 
 export const main = async () => {
+    for (const cliArg of process.argv.slice(2)) {
+        if (cliArg === "--version") {
+            console.log(`${name} v${version}`);
+            process.exit(0);
+        } else {
+            console.warn(`Unsupported CLI argument: '${cliArg}'`);
+        }
+    }
+
     const {
         clientId,
         clientSecret,

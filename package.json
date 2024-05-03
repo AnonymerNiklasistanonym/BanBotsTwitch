@@ -1,6 +1,6 @@
 {
   "name": "banbots",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "./dist/main.js",
   "scripts": {
     "compile": "tsc",
@@ -24,9 +24,9 @@
       "node20-windows-x64"
     ]
   },
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "author": "AnonymerNiklasistanonym",
+  "license": "MIT",
+  "description": "Automatically ban recent followers or a list of users.",
   "dependencies": {
     "@twurple/api": "^7.1.0",
     "@twurple/auth": "^7.1.0",
