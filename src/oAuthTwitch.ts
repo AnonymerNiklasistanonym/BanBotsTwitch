@@ -1,10 +1,13 @@
+// Package imports
 import axios from 'axios';
 import { ApiClient } from "@twurple/api";
-import { generateOAuthCodeGrant, oAuthRefreshTokenGrantServer } from "./oAuth";
 import { exchangeCode, RefreshingAuthProvider } from "@twurple/auth";
 import fs from "fs/promises";
 import {existsSync} from "fs";
 import path from "path";
+// Local imports
+import { openUrl } from "./openUrl";
+import { generateOAuthCodeGrant, oAuthRefreshTokenGrantServer } from "./oAuth";
 // Type imports
 import { AccessToken } from "@twurple/auth";
 
@@ -14,7 +17,7 @@ const oAuthProviderName = 'Twitch';
 
 const tokenLocation = path.join(process.cwd(), "token.json");
 
-export const oAuthTwitchGetFirstToken = async (clientId: string, clientSecret: string, scopes: ReadonlyArray<string>, redirectPort: number): Promise<AccessToken> => {
+export const oAuthTwitchGetFirstToken = async (clientId: string, clientSecret: string, scopes: ReadonlyArray<string>, redirectPort: number, verbose = false): Promise<AccessToken> => {
   const redirectUri = `${redirectUrl}:${redirectPort}`;
 
   // > Start server to catch authentication URL
@@ -41,12 +44,19 @@ export const oAuthTwitchGetFirstToken = async (clientId: string, clientSecret: s
       if (response?.request?.res?.responseUrl === undefined) {
         reject(new Error("Code grant response URL was undefined"))
       } else {
-        console.info(
-          `Grant the ${oAuthProviderName} API refresh token using the following URL: ${response.request.res.responseUrl}`
-        );
-        //const open = (url: string) => import('open').then(({default: open}) => open(url));
-        const open = await (eval('import("open")') as Promise<typeof import("open")>);
-        await open.default(response.request.res.responseUrl);
+        if (verbose === true) {
+          console.info(
+            `Grant the ${oAuthProviderName} API refresh token using the following URL: ${response.request.res.responseUrl}`
+          );
+        }
+        try {
+          await openUrl(response.request.res.responseUrl);
+        } catch(err) {
+          console.warn(err);
+          console.warn(
+            `Unexpected error while trying to open a URL in the default browser, open it manually instead: ${response.request.res.responseUrl}`
+          );
+        }
       }
     }
 
@@ -69,11 +79,11 @@ export const oAuthTwitchGetFirstToken = async (clientId: string, clientSecret: s
   return initialTokenData;
 }
 
-export const oAuthTwitch = async (clientId: string, clientSecret: string, scopes: ReadonlyArray<string>, redirectPort: number): Promise<RefreshingAuthProvider> => {
+export const oAuthTwitch = async (clientId: string, clientSecret: string, scopes: ReadonlyArray<string>, redirectPort: number, verbose = false): Promise<RefreshingAuthProvider> => {
 
   const token = existsSync(tokenLocation)
   ? JSON.parse(await fs.readFile(tokenLocation, 'utf-8')) as AccessToken
-  : await oAuthTwitchGetFirstToken(clientId, clientSecret, scopes, redirectPort);
+  : await oAuthTwitchGetFirstToken(clientId, clientSecret, scopes, redirectPort, verbose);
 
   const authProvider = new RefreshingAuthProvider(
     {
@@ -87,8 +97,8 @@ export const oAuthTwitch = async (clientId: string, clientSecret: string, scopes
   return authProvider;
 }
 
-export const getApiClientTwitch = async (clientId: string, clientSecret: string, scopes: ReadonlyArray<string>, redirectPort: number) => {
-  const authProvider = await oAuthTwitch(clientId, clientSecret, scopes, redirectPort);
+export const getApiClientTwitch = async (clientId: string, clientSecret: string, scopes: ReadonlyArray<string>, redirectPort: number, verbose = false) => {
+  const authProvider = await oAuthTwitch(clientId, clientSecret, scopes, redirectPort, verbose);
   const apiClient = new ApiClient({ authProvider });
   return apiClient;
 }

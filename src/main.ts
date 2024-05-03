@@ -43,7 +43,7 @@ export const main = async () => {
         verbose,
     } = JSON.parse(await fs.readFile(argumentsFilePath, 'utf8')) as Arguments
 
-    const apiClient = await getApiClientTwitch(clientId, clientSecret, scopes, redirectPort);
+    const apiClient = await getApiClientTwitch(clientId, clientSecret, scopes, redirectPort, verbose);
 
     if (verbose === true) {
         console.info({ banReason, channelName, userNamesToBan, banUsersWhoFollowedInTheLastMinutes, dryRun, unban });

@@ -37,7 +37,7 @@ In case you get a bot/hate raid you can use the following program to ban all of 
 
     > **Run this program at least once with `dryRun = true` to verify that the right followers will be banned!**
 
-3. Run the program:
+3. Run the program using the following commands:
 
    ```sh
    npm install
@@ -45,16 +45,19 @@ In case you get a bot/hate raid you can use the following program to ban all of 
    npm run start
    ```
 
-## TODOs
+## Binary
 
-### Binary
-
-The current binary has a problem with a dynamic ESM import so it's only usable after the initial token was fetched (= unusable).
+You can build a standalone binary of this project using the following commands:
 
 ```sh
 npm install
 npm run compile
 npm run pkg
+```
+
+Which can then be run using the following commands:
+
+```sh
 # Linux
 ./bin/banbots-linux-x64
 ```
