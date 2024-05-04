@@ -1,4 +1,5 @@
 {
+    "$schema": "./src/arguments.schema.json",
     "channelName": "TODO Insert your own channel",
     "banReason": "TODO Delete or add your own reason",
     "userNamesToBan": [],

@@ -3,23 +3,31 @@ import path from "path";
 import fs from "fs/promises";
 // Local imports
 import { getApiClientTwitch } from './oAuthTwitch';
+import { validateJsonSchemaObject } from "./validate";
 // Type imports
 import type { ApiClient } from '@twurple/api';
 
 const credentialsFilePath = path.join(process.cwd(), "credentials.json");
 const argumentsFilePath = path.join(process.cwd(), "arguments.json");
 
-const name = "banbots";
-const version = "1.0.1";
+const credentialsJsonSchemaFilePath = path.join(__dirname, "credentials.schema.json");
+const argumentsJsonSchemaFilePath = path.join(__dirname, "arguments.schema.json");
 
-interface Credentials {
+const name = "banbots";
+const version = "1.0.2";
+
+export interface JSONSchemaBase {
+    $schema?: string;
+}
+
+export interface Credentials extends JSONSchemaBase {
     clientId: string;
     clientSecret: string;
     scopes: ReadonlyArray<string>;
     redirectPort: number;
 }
 
-interface Arguments {
+export interface Arguments extends JSONSchemaBase {
     channelName: string;
     banReason?: string;
     userNamesToBan?: ReadonlyArray<string>;
@@ -39,12 +47,18 @@ export const main = async () => {
         }
     }
 
+    const credentials = JSON.parse(await fs.readFile(credentialsFilePath, 'utf8')) as Credentials;
+    const credentialsJsonSchema = JSON.parse(await fs.readFile(credentialsJsonSchemaFilePath, 'utf8'));
+    validateJsonSchemaObject<Credentials>('credentials.json', credentialsJsonSchema, credentials);
     const {
         clientId,
         clientSecret,
         scopes,
         redirectPort,
-    } = JSON.parse(await fs.readFile(credentialsFilePath, 'utf8')) as Credentials
+    } = credentials;
+    const args = JSON.parse(await fs.readFile(argumentsFilePath, 'utf8')) as Arguments;
+    const argumentsJsonSchema = JSON.parse(await fs.readFile(argumentsJsonSchemaFilePath, 'utf8'));
+    validateJsonSchemaObject<Arguments>('arguments.json', argumentsJsonSchema, args);
     const {
         banReason,
         channelName,
@@ -53,12 +67,13 @@ export const main = async () => {
         dryRun,
         unban,
         verbose,
-    } = JSON.parse(await fs.readFile(argumentsFilePath, 'utf8')) as Arguments
+    } = args;
 
     const apiClient = await getApiClientTwitch(clientId, clientSecret, scopes, redirectPort, verbose);
 
     if (verbose === true) {
-        console.info({ banReason, channelName, userNamesToBan, banUsersWhoFollowedInTheLastMinutes, dryRun, unban });
+        console.info("credentials:", credentials);
+        console.info("args:", args);
     }
 
     if (userNamesToBan !== undefined) {

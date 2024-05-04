@@ -63,6 +63,8 @@ jobs:
     #  continue-on-error: true
     - name: Build
       run: npm run compile
+    - name: Dist
+      run: npm run dist
     #- name: Lint circular dependencies
     #  run: npm run lint:circular
     #  continue-on-error: true

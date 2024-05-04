@@ -1,0 +1,42 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/Arguments",
+    "definitions": {
+        "Arguments": {
+            "type": "object",
+            "properties": {
+                "$schema": {
+                    "type": "string"
+                },
+                "channelName": {
+                    "type": "string"
+                },
+                "banReason": {
+                    "type": "string"
+                },
+                "userNamesToBan": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "banUsersWhoFollowedInTheLastMinutes": {
+                    "type": "number"
+                },
+                "unban": {
+                    "type": "boolean"
+                },
+                "dryRun": {
+                    "type": "boolean"
+                },
+                "verbose": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "channelName"
+            ],
+            "additionalProperties": false
+        }
+    }
+}

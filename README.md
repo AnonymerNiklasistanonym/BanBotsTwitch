@@ -12,6 +12,7 @@ Automatically ban recent followers or a list of users.
 
    ```json
    {
+        "$schema":  "./src/credentials.schema.json",
         "clientId": "GET THIS FROM https://dev.twitch.tv/console/apps",
         "clientSecret": "GET THIS FROM https://dev.twitch.tv/console/apps",
         "scopes": [
@@ -28,6 +29,7 @@ Automatically ban recent followers or a list of users.
 
    ```json
     {
+        "$schema":  "./src/arguments.schema.json",
         "channelName": "TODO Insert your own channel",
         "banReason": "TODO Delete or add your own reason",
         "userNamesToBan": [],
@@ -44,6 +46,7 @@ Automatically ban recent followers or a list of users.
    ```sh
    npm install
    npm run compile
+   npm run dist
    npm run start
    ```
 
@@ -54,6 +57,7 @@ You can build a standalone binary of this project using the following commands:
 ```sh
 npm install
 npm run compile
+npm run dist
 npm run pkg
 ```
 
